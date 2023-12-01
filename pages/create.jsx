@@ -15,7 +15,7 @@ function Create() {
 
   const router = useRouter()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
 
     if (!title || !description || !imageUrl || !prize || !ticketPrice || !expiresAt) return
@@ -28,22 +28,9 @@ function Create() {
       expiresAt: new Date(expiresAt).getTime(),
     }
 
-    await toast.promise(
-      new Promise(async (resolve, reject) => {
-        await createJackpot(params)
-          .then(() => {
-            router.push('/')
-            onReset()
-            resolve()
-          })
-          .catch(() => reject())
-      }),
-      {
-        pending: 'Approve transaction...',
-        success: 'Lottery created successfully 👌',
-        error: 'Encountered error 🤯',
-      }
-    )
+    console.log(params)
+    onReset()
+    router.push('/')
   }
 
   const onReset = () => {
@@ -64,12 +51,11 @@ function Create() {
 
       <div className="min-h-screen bg-slate-100">
         <SubHeader />
-
         <div className="flex flex-col justify-center items-center mt-20">
           <div className="flex flex-col items-center justify-center my-5">
             <h1 className="text-2xl font-bold text-slate-800 py-5">Create Jackpots</h1>
             <p className="text-center text-sm text-slate-600">
-              We bring a persolan and effective every project we work on. <br />
+              We bring a personal and effective every project we work on. <br />
               which is why our client love why they keep coming back.
             </p>
           </div>

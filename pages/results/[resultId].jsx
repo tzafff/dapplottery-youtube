@@ -1,23 +1,14 @@
 import Head from 'next/head'
-import Winners from '@/components/Winners'
 import SubHeader from '@/components/SubHeader'
 import ResultTable from '@/components/ResultTable'
-import { globalActions } from '@/store/globalSlices'
-import { useDispatch, useSelector } from 'react-redux'
-import { getLottery, getParticipants, getLotteryResult } from '@/services/blockchain'
-import { useEffect } from 'react'
+import Winners from '@/components/Winners'
+import {
+  generateLottery,
+  generateLotteryParticipants,
+} from '@/services/fakeData'
 
-function Result({ lottery, participantList, lotteryResult }) {
-  const { setJackpot, setResult, setParticipants } = globalActions
-  const { participants, jackpot, result } = useSelector((states) => states.globalStates)
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    dispatch(setJackpot(lottery))
-    dispatch(setParticipants(participantList))
-    dispatch(setResult(lotteryResult))
-  }, [])
-
+function Result({lottery, participantList, lotteryResult}) {
+  console.log({lottery,participantList,lotteryResult});
   return (
     <div>
       <Head>
@@ -27,7 +18,7 @@ function Result({ lottery, participantList, lotteryResult }) {
 
       <div className="min-h-screen bg-slate-100">
         <SubHeader />
-        <ResultTable jackpot={jackpot} participants={participants} result={result} />
+        <ResultTable jackpot={lottery} participants={participantList} result={lotteryResult}/>
         <Winners />
       </div>
     </div>
@@ -37,10 +28,11 @@ function Result({ lottery, participantList, lotteryResult }) {
 export default Result
 
 export const getServerSideProps = async (context) => {
-  const { resultId } = context.query
-  const lottery = await getLottery(resultId)
-  const participantList = await getParticipants(resultId)
-  const lotteryResult = await getLotteryResult(resultId)
+  const { resultId } = context.query //Grab URL ID eg: http://localhost:3000/results/1 <-
+  const lottery = generateLottery(resultId)
+  const participantList = generateLotteryParticipants(6)
+  const lotteryResult = []
+
   return {
     props: {
       lottery: JSON.parse(JSON.stringify(lottery)),

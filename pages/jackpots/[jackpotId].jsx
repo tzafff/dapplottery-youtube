@@ -1,23 +1,10 @@
 import Head from 'next/head'
-import { useEffect } from 'react'
 import SubHeader from '@/components/SubHeader'
-import Generator from '@/components/Generator'
 import JackpotTable from '@/components/JackpotTable'
-import { globalActions } from '@/store/globalSlices'
-import { useDispatch, useSelector } from 'react-redux'
-import { getLottery, getLuckyNumbers, getPurchasedNumbers } from '@/services/blockchain'
+import { generateLottery, getPurchasedNumbers } from '@/services/fakeData'
+import Generator from '@/components/Generator'
 
 function Jackpot({ lottery, lotteryNumbers, numbersPurchased }) {
-  const dispatch = useDispatch()
-  const { setJackpot, setLuckyNumbers, setPurchasedNumbers } = globalActions
-  const { luckyNumbers, purchasedNumbers, jackpot } = useSelector((states) => states.globalStates)
-
-  useEffect(() => {
-    dispatch(setJackpot(lottery))
-    dispatch(setLuckyNumbers(lotteryNumbers))
-    dispatch(setPurchasedNumbers(numbersPurchased))
-  }, [])
-
   return (
     <div>
       <Head>
@@ -28,9 +15,9 @@ function Jackpot({ lottery, lotteryNumbers, numbersPurchased }) {
       <div className="min-h-screen bg-slate-100">
         <SubHeader />
         <JackpotTable
-          jackpot={jackpot}
-          luckyNumbers={luckyNumbers}
-          participants={purchasedNumbers}
+          jackpot={lottery}
+          luckyNumbers={lotteryNumbers}
+          participants={numbersPurchased}
         />
         <Generator />
       </div>
@@ -41,10 +28,10 @@ function Jackpot({ lottery, lotteryNumbers, numbersPurchased }) {
 export default Jackpot
 
 export const getServerSideProps = async (context) => {
-  const { jackpotId } = context.query
-  const lottery = await getLottery(jackpotId)
-  const purchasedNumbers = await getPurchasedNumbers(jackpotId)
-  const lotteryNumbers = await getLuckyNumbers(jackpotId)
+  const { jackpotId } = context.query //Grab URL ID eg: http://localhost:3000/jackpots/1 <-
+  const lottery = generateLottery(jackpotId)
+  const purchasedNumbers = getPurchasedNumbers(5)
+  const lotteryNumbers = getPurchasedNumbers(5)
 
   return {
     props: {

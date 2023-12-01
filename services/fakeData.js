@@ -42,7 +42,7 @@ const generateLotteries = (n) => {
       new Date('2022-12-31').getTime()
     )
     const expiresIn = getRandomInt(7, 30)
-    const expiresAt = new Date(Date.now() + expiresIn * 24 * 60 * 60 * 1000).getTime()
+    const expiresAt = new Date(Date.now() + expiresIn * 24 * 60 * 1000).getTime()
     const participants = getRandomInt(10, 100)
     const drawn = false
 
@@ -61,7 +61,6 @@ const generateLotteries = (n) => {
       drawn,
     })
   }
-
   return lotteries
 }
 
@@ -92,18 +91,19 @@ function generateLotteryParticipants(count) {
   return participants
 }
 
-function getPurchasedNumbers(count) {
+function getPurchasedNumbers(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   const result = []
-  for (let i = 0; i < count; i++) {
+  for(let i = 0; i < length; i++) {
     let string = ''
-    for (let j = 0; j < 6; j++) {
+    for(let j = 0; j < 6; j++) {
       string += characters.charAt(Math.floor(Math.random() * characters.length))
     }
     result.push(string)
   }
   return result
 }
+
 
 function generateRandomEthereumAddress() {
   const hexChars = '0123456789abcdef'
