@@ -47,7 +47,11 @@ contract DappLottery is Ownable {
     uint256 public servicePercent;
     uint256 public serviceBalance;
 
-    function createLottery (
+    constructor(uint256 _servicePercent) {
+        servicePercent = _servicePercent;
+    }
+
+    function createLottery(
         string memory title,
         string memory description,
         string memory image,
@@ -55,14 +59,14 @@ contract DappLottery is Ownable {
         uint256 ticketPrice,
         uint256 expiresAt
     ) public {
-        require(bytes(title).length > 0 ,"Titile cannot be empty");
-        require(bytes(description).length > 0 ,"description cannot be empty");
-        require(bytes(image).length > 0 ,"image cannot be empty");
+        require(bytes(title).length > 0, "title cannot be empty");
+        require(bytes(description).length > 0, "description cannot be empty");
+        require(bytes(image).length > 0, "image cannot be empty");
         require(prize > 0 ether, "prize cannot be zero");
-        require(ticketPrice > 0 ether, " ticketPrie cannot be zero");
+        require(ticketPrice > 0 ether, "ticketPrice cannot be zero");
         require(
             expiresAt > currentTime(),
-            "expiresAt cannot be less than the future"
+            "expireAt cannot be less than the future"
         );
 
         _totalLotteries.increment();
@@ -79,10 +83,11 @@ contract DappLottery is Ownable {
         lottery.expiresAt = expiresAt;
 
         lotteries[lottery.id] = lottery;
-        
     }
 
-    function importLuckyNumbers(uint256 id, string[] memory luckyNumbers) public {
+    function importLuckyNumbers(uint256 id, string[] memory luckyNumbers)
+        public
+    {
         require(luckyNumbers.length > 0, "Lucky numbers cannot be zero");
         require(lotteries[id].owner == msg.sender, "Unauthorized entity");
         require(lotteryLuckyNumbers[id].length < 1, "Already generated");
@@ -90,8 +95,14 @@ contract DappLottery is Ownable {
     }
 
     function buyTicket(uint256 id, uint256 luckyNumberId) public payable {
-        require(!luckyNumberUsed[id][luckyNumberId], "Lucky number already used");
-        require(msg.value >= lotteries[id].ticketPrice, "insufficient ethers to buy ticket");
+        require(
+            !luckyNumberUsed[id][luckyNumberId],
+            "Lucky number already used"
+        );
+        require(
+            msg.value >= lotteries[id].ticketPrice,
+            "insufficient ethers to buy ticket"
+        );
 
         lotteries[id].participants++;
         lotteryParticipants[id].push(
@@ -104,37 +115,42 @@ contract DappLottery is Ownable {
 
         luckyNumberUsed[id][luckyNumberId] = true;
         serviceBalance += msg.value;
-
     }
 
     function randomlySelectWinners(uint256 id, uint256 numOfWinners) public {
-        require(lotteries[id].owner == msg.sender || msg.sender == owner() ,"Unauthorized entity");
-        require(numOfWinners <= lotteryParticipants[id].length, "Number of winners exceeds number of participants");
-        require(!lotteryResult[id].completed, "Lottery have alreay been completed");
+        require(
+            lotteries[id].owner == msg.sender ||
+            msg.sender == owner(),
+            "Unauthorized entity"
+        );
+        require(!lotteryResult[id].completed, "Lottery have already been completed");
+        require(
+            numOfWinners <= lotteryParticipants[id].length,
+            "Number of winners exceeds number of participants"
+        );
 
-        //  Initialize an array to store the selected winners
+        // Initialize an array to store the selected winners
         ParticipantStruct[] memory winners = new ParticipantStruct[](numOfWinners);
-        ParticipantStruct[] memory participants = lotteryParticipants[id];   
+        ParticipantStruct[] memory participants = lotteryParticipants[id];
 
-        //  Initialize the list of indices with the values 0, 1, ..., n-1
+        // Initialize the list of indices with the values 0, 1, ..., n-1
         uint256[] memory indices = new uint256[](participants.length);
-        for(uint256 i = 0; i < participants.length; i++) {
+        for (uint256 i = 0; i < participants.length; i++) {
             indices[i] = i;
-        } 
+        }
 
-        //  Shuffle the list of indices using Fisher-Yates algorithm
-        for(uint256 i = participants.length - 1; i >= 1; i--) {
+        // Shuffle the list of indices using Fisher-Yates algorithm
+        for (uint256 i = participants.length - 1; i >= 1; i--) {
             uint256 j = uint256(
                 keccak256(abi.encodePacked(currentTime(), i))
-
             ) % (i + 1);
             uint256 temp = indices[j];
             indices[j] = indices[i];
             indices[i] = temp;
         }
 
-        //  Select the winners using the first numOfWinners indices
-        for(uint256 i = 0; i < numOfWinners; i++) {
+        // Select the winners using the first numOfWinners indices
+        for (uint256 i = 0; i < numOfWinners; i++) {
             winners[i] = participants[indices[i]];
             lotteryResult[id].winners.push(winners[i]);
         }
@@ -154,17 +170,40 @@ contract DappLottery is Ownable {
         uint256 netShare = totalShares - platformShare;
         uint256 sharesPerWinner = netShare / winners.length;
 
-        for(uint256 i = 0;  i < winners.length; i++) {
-           payTo(winners[i].account, sharesPerWinner);
-        }
+        for (uint256 i = 0; i < winners.length; i++) 
+        payTo(winners[i].account, sharesPerWinner);
 
         payTo(owner(), platformShare);
         serviceBalance -= totalShares;
         lotteryResult[id].id = id;
         lotteryResult[id].paidout = true;
         lotteryResult[id].sharePerWinner = sharesPerWinner;
-
     }
+
+    function getLotteries() public view returns (LotteryStruct[] memory Lotteries) {
+        Lotteries = new LotteryStruct[](_totalLotteries.current());
+
+        for (uint256 i = 1; i <= _totalLotteries.current(); i++) {
+            Lotteries[i - 1] = lotteries[i];
+        }
+    }
+
+    function getLottery(uint256 id) public view returns (LotteryStruct memory) {
+        return lotteries[id];
+    }
+
+    function getLotteryParticipants(uint256 id) public view returns (ParticipantStruct[] memory) {
+        return lotteryParticipants[id];
+    }
+    
+    function getLotteryLuckyNumbers(uint256 id) public view returns (string[] memory) {
+        return lotteryLuckyNumbers[id];
+    }
+    
+    function getLotteryResult(uint256 id) public view returns (LotteryResultStruct memory) {
+        return lotteryResult[id];
+    }
+
 
     function payTo(address to, uint256 amount) internal {
         (bool success, ) = payable(to).call{value: amount}("");
@@ -172,16 +211,7 @@ contract DappLottery is Ownable {
     }
 
     function currentTime() internal view returns (uint256) {
-        uint256 newNum = (block.timestamp * 1000) + 1000; 
+        uint256 newNum = (block.timestamp * 1000) + 1000;
         return newNum;
-    }
-
-    function getLotteries() public view returns (LotteryStruct[] memory Lotteries) {
-        Lotteries = new LotteryStruct[](_totalLotteries.current());
-
-        for(uint256 i = 1; i < _totalLotteries.current(); i++ ) {
-            Lotteries[i - 1] = lotteries[i];
-        }
-        
     }
 }
