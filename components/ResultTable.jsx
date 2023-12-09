@@ -3,24 +3,13 @@ import { toast } from 'react-toastify'
 import Identicon from 'react-identicons'
 import { FaEthereum } from 'react-icons/fa'
 import Countdown from '@/components/Countdown'
-import { truncate } from '@/services/fakeData'
+import { truncate } from '@/services/blockchain'
 import { useDispatch, useSelector } from 'react-redux'
 import { globalActions } from '@/store/globalSlices'
 
-const ResultTable = ({jackpot, participants, result}) => {
-  
-    const truncate = (text, startCharts, endCharts, maxLength) => {
-        if(text.length > maxLength) {
-            let start = text.substring(0, startCharts)
-            let end = text.substring(text.length - endCharts, text.length)
-            while(start.length + end.length < maxLength) {
-                start = start + '.'
-            }
-            return start + end
-        }
-        return text
-    }
-
+const ResultTable = ({ jackpot, participants, result }) => {
+  const { setWinnersModal } = globalActions
+  const dispatch = useDispatch()
 
   return (
     <div className="py-10 px-5 bg-slate-100">
@@ -30,9 +19,10 @@ const ResultTable = ({jackpot, participants, result}) => {
         <p className="text-sm text-gray-500 w-full sm:w-2/3">{jackpot?.description}</p>
         <p className="text-sm font-medium text-black w-full sm:w-2/3">
           Result for{' '}
-          <span className="font-medium text-green-600">{result?.winners?.length} winners</span> out of{' '}
+          <span className="font-medium text-green-600">{result?.winners?.length} winners</span> out
+          of{' '}
           <span className="font-medium text-gray-600"> {jackpot?.participants} participants</span>{' '}
-          {result?.winners?.length  > 0 ? 'Drawn' : 'Not Drawn'}
+          {result?.winners?.length > 0 ? 'Drawn' : 'Not Drawn'}
         </p>
       </div>
 
@@ -40,6 +30,7 @@ const ResultTable = ({jackpot, participants, result}) => {
         {jackpot?.expiresAt ? <Countdown timestamp={jackpot?.expiresAt} /> : null}
         <div className="flex justify-center items-center space-x-2">
           <button
+            onClick={() => dispatch(setWinnersModal('scale-100'))}
             className="flex flex-nowrap border py-2 px-4 rounded-full bg-green-500
                 hover:bg-rose-600 font-semibold"
           >
@@ -66,18 +57,21 @@ const ResultTable = ({jackpot, participants, result}) => {
                 key={i}
                 className="flex justify-start items-center border-b border-gray-100 py-2 space-x-2"
               >
-                <Identicon size={30} string={participant.account} className="rounded-full h-12 w-12" />
+                <Identicon
+                  size={30}
+                  string={participant.account}
+                  className="rounded-full h-12 w-12"
+                />
                 <div className="flex justify-center items-center space-x-2 text-sm">
                   <p className="font-semibold text-lg text-slate-500">
                     {truncate(participant.account, 4, 4, 11)}
-                    
                   </p>
                   <p className="text-slate-500">{participant.lotteryNumber}</p>
                   {result?.winners?.includes(participant.lotteryNumber) ? (
                     <p className="text-green-500 flex justify-start items-center">
                       + <FaEthereum /> result?.sharedPerWinner {'winner'}
                     </p>
-                   ) : (
+                  ) : (
                     <p className="text-red-500 flex justify-start items-center">
                       - <FaEthereum /> {jackpot?.ticketPrice}
                     </p>

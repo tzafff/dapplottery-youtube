@@ -1,8 +1,12 @@
 import Link from 'next/link'
 import { FaEthereum } from 'react-icons/fa'
 import Countdown from '@/components/Countdown'
+import { globalActions } from '@/store/globalSlices'
+import { useDispatch } from 'react-redux'
 
 const JackpotTable = ({ jackpot, luckyNumbers, participants }) => {
+  const { setGeneratorModal } = globalActions
+  const dispatch = useDispatch()
   const handlePurchase = async (luckyNumberId) => {
     console.log(luckyNumberId)
   }
@@ -22,6 +26,7 @@ const JackpotTable = ({ jackpot, luckyNumbers, participants }) => {
         {jackpot?.expiresAt ? <Countdown timestamp={jackpot?.expiresAt} /> : null}
         <div className="flex justify-center items-center space-x-2">
           <button
+          onClick={() => dispatch(setGeneratorModal('scale-100'))}
             className="flex flex-nowrap border py-2 px-4 rounded-full bg-amber-500
                 hover:bg-rose-600 font-semibold"
           >

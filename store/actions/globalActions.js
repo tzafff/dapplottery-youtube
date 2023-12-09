@@ -5,12 +5,12 @@ export const globalActions = {
   // setJackpots: (state, action) => {
   //   state.jackpots = action.payload
   // },
-  // setGeneratorModal: (state, action) => {
-  //   state.generatorModal = action.payload
-  // },
-  // setWinnersModal: (state, action) => {
-  //   state.winnersModal = action.payload
-  // },
+  setGeneratorModal: (state, action) => {
+    state.generatorModal = action.payload
+  },
+  setWinnersModal: (state, action) => {
+    state.winnersModal = action.payload
+  },
   // setJackpot: (state, action) => {
   //   state.jackpot = action.payload
   // },
