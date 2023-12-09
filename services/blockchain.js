@@ -17,6 +17,19 @@ if (typeof window !== 'undefined') {
 const toWei = (num) => ethers.utils.parseEther(num.toString())
 const fromWei = (num) => ethers.utils.formatEther(num)
 
+const ssrEthereumContract = async () => {
+  //const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545/');
+  const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545/')
+
+  const network = await provider.getNetwork()
+  console.log('Connected to network:', network)
+
+  const wallet = ethers.Wallet.createRandom()
+  const signer = provider.getSigner(wallet.address)
+  const contract = new ethers.Contract(contractAddress, contractAbi, signer)
+  return contract
+}
+
 const connectWallet = async () => {
   try {
     if (!ethereum) return reportError('Please install Metamask')
@@ -41,15 +54,64 @@ const monitorWalletConnection = async () => {
       await monitorWalletConnection()
     })
 
-    if(accounts.length) {
+    if (accounts.length) {
       store.dispatch(setWallet(accounts[0]))
     } else {
       store.dispatch(setWallet(''))
-      reportError('Please, connect wallet, no accounts found')
+      reportError('Please, connect wallet, no accounts found.')
     }
   } catch (error) {
     reportError(error)
   }
+}
+
+const getLotteries = async () => {
+  const contract = await ssrEthereumContract()
+  const lotteries = await contract.getLotteries()
+  return structureLotteries(lotteries)
+}
+
+const structureLotteries = (lotteries) =>
+  lotteries.map((lottery) => ({
+    id: Number(lottery.id),
+    title: lottery.title,
+    description: lottery.description,
+    owner: lottery.owner.toLowerCase(),
+    prize: fromWei(lottery.prize),
+    ticketPrice: fromWei(lottery.ticketPrice),
+    image: lottery.image,
+    createdAt: formatDate(Number(lottery.createdAt)),
+    drawsAt: formatDate(Number(lottery.expiresAt)),
+    expiresAt: Number(lottery.expiresAt),
+    winners: Number(lottery.winners),
+    participants: Number(lottery.participants),
+    drawn: lottery.drawn,
+  }))
+
+const formatDate = (timestamp) => {
+  const date = new Date(timestamp)
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const monthsOfYear = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ]
+
+  const dayOfWeek = daysOfWeek[date.getDay()]
+  const monthOfYear = monthsOfYear[date.getMonth()]
+  const dayOfMonth = date.getDate()
+  const year = date.getFullYear()
+
+  return `${dayOfWeek} ${monthOfYear} ${dayOfMonth}, ${year}`
 }
 
 const truncate = (text, startChars, endChars, maxLength) => {
@@ -67,4 +129,4 @@ const truncate = (text, startChars, endChars, maxLength) => {
 const reportError = (error) => {
   console.log(error.message)
 }
-export { connectWallet, truncate, monitorWalletConnection }
+export { connectWallet, truncate, monitorWalletConnection, getLotteries }
