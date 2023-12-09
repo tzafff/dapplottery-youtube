@@ -71,6 +71,12 @@ const getLotteries = async () => {
   return structureLotteries(lotteries)
 }
 
+const getLottery = async (id) => {
+  const contract = await ssrEthereumContract()
+  const lottery = await contract.getLottery(id)
+  return structureLotteries([lottery])[0] //  Pass it like array because structureLotteries needs array
+}
+
 const structureLotteries = (lotteries) =>
   lotteries.map((lottery) => ({
     id: Number(lottery.id),
@@ -129,4 +135,4 @@ const truncate = (text, startChars, endChars, maxLength) => {
 const reportError = (error) => {
   console.log(error.message)
 }
-export { connectWallet, truncate, monitorWalletConnection, getLotteries }
+export { connectWallet, truncate, monitorWalletConnection, getLotteries, getLottery }

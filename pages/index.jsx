@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import Header from '@/components/Header'
 import Jackpots from '@/components/Jackpots'
-import { generateLotteries } from '@/services/fakeData'
 import { getLotteries } from '@/services/blockchain'
 
 
