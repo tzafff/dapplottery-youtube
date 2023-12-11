@@ -1,14 +1,36 @@
 import Link from 'next/link'
+import { toast } from 'react-toastify'
+import { useRouter } from 'next/router'
 import { FaEthereum } from 'react-icons/fa'
 import Countdown from '@/components/Countdown'
 import { globalActions } from '@/store/globalSlices'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { buyTicket } from '@/services/blockchain'
 
 const JackpotTable = ({ jackpot, luckyNumbers, participants }) => {
+  const router = useRouter()
+  const { jackpotId } = router.query
   const { setGeneratorModal } = globalActions
   const dispatch = useDispatch()
+  const { wallet } = useSelector((states) => states.globalStates)
+
   const handlePurchase = async (luckyNumberId) => {
-    console.log(luckyNumberId)
+    if(!wallet) return toast.warning('Connect your Wallet')
+
+    await toast.promise(
+      new Promise(async (resolve, reject) => {
+        await buyTicket(jackpotId, luckyNumberId, jackpot?.ticketPrice)
+          .then(async () => { 
+            resolve()
+          })
+          .catch(() => reject())
+      }),
+      {
+        pending: 'Approve transaction...',
+        success: 'Ticket purchased Successfully 👌',
+        error: 'Encountered error 🤯',
+      }
+    )
   }
 
   return (
@@ -72,13 +94,12 @@ const JackpotTable = ({ jackpot, luckyNumbers, participants }) => {
                 <td className="px-4 py-2 font-semibold">{luckyNumber}</td>
                 <td className="px-4 py-2 font-semibold">
                   <button
-                    className="bg-black hover:bg-rose-600 text-white text-sm py-2 px-4 rounded-full"
-                    onClick={() => handlePurchase(luckyNumber)}
-                    // className={`bg-black ${
-                    //   participants.includes(luckyNumber)
-                    //     ? 'opacity-50 cursor-not-allowed'
-                    //     : 'hover:bg-rose-600'
-                    // } text-white text-sm py-2 px-4 rounded-full`}
+                    onClick={() => handlePurchase(i)}
+                    className={`bg-black ${
+                      participants.includes(luckyNumber)
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-rose-600'
+                    } text-white text-sm py-2 px-4 rounded-full`}
                   >
                     BUY NOW
                   </button>

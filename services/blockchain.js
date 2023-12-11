@@ -90,6 +90,12 @@ const getLuckyNumbers = async (id) => {
   return luckyNumbers
 }
 
+const getPurchasedNumbers = async (id) => {
+  const contract = await ssrEthereumContract()
+  const participants = await contract.getLotteryParticipants(id)
+  return structuredNumbers(participants)
+}
+
 const createJackpot = async ({ title, description, imageUrl, prize, ticketPrice, expiresAt }) => {
   try {
     if (!ethereum) return reportError('Please install Metamask')
@@ -120,6 +126,22 @@ const exportLuckyNumbers = async (id, luckyNumbers) => {
 
     tx = await contract.importLuckyNumbers(id, luckyNumbers, {
       from: wallet,
+    })
+    tx.wait()
+  } catch (error) {
+    reportError(error)
+  }
+}
+
+const buyTicket = async (id, luckyNumberId, ticketPrice) => {
+  try {
+    if (!ethereum) return reportError('Please install Metamask')
+    const wallet = store.getState().globalStates.wallet
+    const contract = await csrEthereumContract()
+
+    tx = await contract.buyTicket(id, luckyNumberId, {
+      from: wallet,
+      value: toWei(ticketPrice)
     })
     tx.wait()
   } catch (error) {
@@ -196,6 +218,17 @@ const generateLuckyNumbers = (count) => {
   return result
 }
 
+const structuredNumbers = (participants) => {
+  const purchasedNumbers = []
+
+  for (let i = 0; i < participants.length; i++) {
+    const purchasedNumber = participants[i][1]
+    purchasedNumbers.push(purchasedNumber)
+  }
+
+  return purchasedNumbers
+}
+
 const reportError = (error) => {
   console.log(error.message)
 }
@@ -208,5 +241,7 @@ export {
   createJackpot,
   exportLuckyNumbers,
   generateLuckyNumbers,
-  getLuckyNumbers
+  getLuckyNumbers,
+  buyTicket,
+  getPurchasedNumbers
 }

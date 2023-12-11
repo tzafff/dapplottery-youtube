@@ -4,10 +4,7 @@ import { useRouter } from 'next/router'
 import { FaTimes } from 'react-icons/fa'
 import { globalActions } from '@/store/globalSlices'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  exportLuckyNumbers,
-  generateLuckyNumbers
-} from '@/services/blockchain'
+import { exportLuckyNumbers, generateLuckyNumbers } from '@/services/blockchain'
 import { resolve } from 'path'
 
 const Generator = () => {
@@ -21,18 +18,15 @@ const Generator = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    //console.log(getPurchasedNumbers(luckyNumbers))
-    //dispatch(setGeneratorModal('scale-0'))
-
     await toast.promise(
       new Promise(async (resolve, reject) => {
         await exportLuckyNumbers(jackpotId, generateLuckyNumbers(luckyNumbers))
-        .then(async() => {
-          setLuckyNumbers('')
-          dispatch(setGeneratorModal('scale-0'))
-          resolve()
-        })
-        .catch(() => reject())
+          .then(async () => {
+            setLuckyNumbers('')
+            dispatch(setGeneratorModal('scale-0'))
+            resolve()
+          })
+          .catch(() => reject())
       }),
       {
         pending: 'Approve transaction...',
