@@ -52,13 +52,17 @@ const JackpotTable = ({ jackpot, luckyNumbers, participants }) => {
       <div className="flex flex-col justify-center items-center space-y-4 mb-6">
         {jackpot?.expiresAt ? <Countdown timestamp={jackpot?.expiresAt} /> : null}
         <div className="flex justify-center items-center space-x-2">
-          <button
-          onClick={ onGenerate }
-            className="flex flex-nowrap border py-2 px-4 rounded-full bg-amber-500
-                hover:bg-rose-600 font-semibold"
-          >
-            Generate Lucky Numbers
-          </button>
+          {wallet?.toLowerCase() == jackpot?.owner ? (
+              <button
+              disabled={jackpot?.expiresAt < Date.now()}
+              onClick={ onGenerate }
+                className="flex flex-nowrap border py-2 px-4 rounded-full bg-amber-500
+                    hover:bg-rose-600 font-semibold"
+              >
+                Generate Lucky Numbers
+              </button>
+          ) :
+           null }
 
           <Link
             href={`/results/` + 1}
