@@ -15,7 +15,7 @@ function Create() {
 
   const router = useRouter()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!title || !description || !imageUrl || !prize || !ticketPrice || !expiresAt) return
@@ -28,9 +28,22 @@ function Create() {
       expiresAt: new Date(expiresAt).getTime(),
     }
 
-    console.log(params)
-    onReset()
-    router.push('/')
+    await toast.promise(
+      new Promise(async (resolve, reject) => {
+        await createJackpot(params)
+          .then(() => {
+            router.push('/')
+            onReset()
+            resolve()
+          })
+          .catch(() => reject())
+      }),
+      {
+        pending: 'Approve transaction...',
+        success: 'Lottery created successfully 👌',
+        error: 'Encountered error 🤯',
+      }
+    )
   }
 
   const onReset = () => {

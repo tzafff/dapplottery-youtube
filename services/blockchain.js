@@ -17,6 +17,13 @@ if (typeof window !== 'undefined') {
 const toWei = (num) => ethers.utils.parseEther(num.toString())
 const fromWei = (num) => ethers.utils.formatEther(num)
 
+const csrEthereumContract = async () => {
+  const provider = new ethers.providers.Web3Provider(ethereum)
+  const signer = provider.getSigner()
+  const contract = new ethers.Contract(contractAddress, contractAbi, signer)
+  return contract
+}
+
 const ssrEthereumContract = async () => {
   //const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545/');
   const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545/')
@@ -77,6 +84,30 @@ const getLottery = async (id) => {
   return structureLotteries([lottery])[0] //  Pass it like array because structureLotteries needs array
 }
 
+const createJackpot = async ({ title, description, imageUrl, prize, ticketPrice, expiresAt }) => {
+  try {
+    console.log("test");
+    if (!ethereum) return reportError('Please install Metamask')
+    console.log("test");
+    const wallet = store.getState().globalStates.wallet
+    const contract = await csrEthereumContract()
+    tx = await contract.createLottery(
+      title,
+      description,
+      imageUrl,
+      toWei(prize),
+      toWei(ticketPrice),
+      expiresAt,
+      {
+        from: wallet,
+      }
+    )
+    tx.wait()
+  } catch (error) {
+    reportError(error)
+  }
+}
+
 const structureLotteries = (lotteries) =>
   lotteries.map((lottery) => ({
     id: Number(lottery.id),
@@ -135,4 +166,4 @@ const truncate = (text, startChars, endChars, maxLength) => {
 const reportError = (error) => {
   console.log(error.message)
 }
-export { connectWallet, truncate, monitorWalletConnection, getLotteries, getLottery }
+export { connectWallet, truncate, monitorWalletConnection, getLotteries, getLottery, createJackpot }
