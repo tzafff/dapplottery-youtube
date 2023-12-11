@@ -6,11 +6,13 @@ import { globalActions } from '@/store/globalSlices'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   exportLuckyNumbers,
-  generateLuckyNumbers,
-  getPurchasedNumbers,
-} from '@/services/fakeData'
+  generateLuckyNumbers
+} from '@/services/blockchain'
+import { resolve } from 'path'
 
 const Generator = () => {
+  const router = useRouter()
+  const { jackpotId } = router.query
   const [luckyNumbers, setLuckyNumbers] = useState('')
   const { generatorModal } = useSelector((states) => states.globalStates)
   const { setGeneratorModal } = globalActions
@@ -18,8 +20,26 @@ const Generator = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log(getPurchasedNumbers(luckyNumbers))
-    dispatch(setGeneratorModal('scale-0'))
+
+    //console.log(getPurchasedNumbers(luckyNumbers))
+    //dispatch(setGeneratorModal('scale-0'))
+
+    await toast.promise(
+      new Promise(async (resolve, reject) => {
+        await exportLuckyNumbers(jackpotId, generateLuckyNumbers(luckyNumbers))
+        .then(async() => {
+          setLuckyNumbers('')
+          dispatch(setGeneratorModal('scale-0'))
+          resolve()
+        })
+        .catch(() => reject())
+      }),
+      {
+        pending: 'Approve transaction...',
+        success: 'Lucky Numbers saved to chain 👌',
+        error: 'Encountered error 🤯',
+      }
+    )
   }
 
   return (

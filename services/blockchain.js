@@ -84,11 +84,15 @@ const getLottery = async (id) => {
   return structureLotteries([lottery])[0] //  Pass it like array because structureLotteries needs array
 }
 
+const getLuckyNumbers = async (id) => {
+  const contract = await ssrEthereumContract()
+  const luckyNumbers = await contract.getLotteryLuckyNumbers(id)
+  return luckyNumbers
+}
+
 const createJackpot = async ({ title, description, imageUrl, prize, ticketPrice, expiresAt }) => {
   try {
-    console.log("test");
     if (!ethereum) return reportError('Please install Metamask')
-    console.log("test");
     const wallet = store.getState().globalStates.wallet
     const contract = await csrEthereumContract()
     tx = await contract.createLottery(
@@ -102,6 +106,21 @@ const createJackpot = async ({ title, description, imageUrl, prize, ticketPrice,
         from: wallet,
       }
     )
+    tx.wait()
+  } catch (error) {
+    reportError(error)
+  }
+}
+
+const exportLuckyNumbers = async (id, luckyNumbers) => {
+  try {
+    if (!ethereum) return reportError('Please install Metamask')
+    const wallet = store.getState().globalStates.wallet
+    const contract = await csrEthereumContract()
+
+    tx = await contract.importLuckyNumbers(id, luckyNumbers, {
+      from: wallet,
+    })
     tx.wait()
   } catch (error) {
     reportError(error)
@@ -163,7 +182,31 @@ const truncate = (text, startChars, endChars, maxLength) => {
   return text
 }
 
+const generateLuckyNumbers = (count) => {
+  const result = []
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const charactersLength = characters.length
+  for (let i = 0; i < count; i++) {
+    let string = ''
+    for (let j = 0; j < 6; j++) {
+      string += characters.charAt(Math.floor(Math.random() * charactersLength))
+    }
+    result.push(string)
+  }
+  return result
+}
+
 const reportError = (error) => {
   console.log(error.message)
 }
-export { connectWallet, truncate, monitorWalletConnection, getLotteries, getLottery, createJackpot }
+export {
+  connectWallet,
+  truncate,
+  monitorWalletConnection,
+  getLotteries,
+  getLottery,
+  createJackpot,
+  exportLuckyNumbers,
+  generateLuckyNumbers,
+  getLuckyNumbers
+}
