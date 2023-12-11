@@ -1,10 +1,23 @@
 import Head from 'next/head'
+import { useEffect } from 'react'
 import SubHeader from '@/components/SubHeader'
-import JackpotTable from '@/components/JackpotTable'
-import { getLottery, getLuckyNumbers, getPurchasedNumbers } from '@/services/blockchain'
 import Generator from '@/components/Generator'
+import JackpotTable from '@/components/JackpotTable'
+import { globalActions } from '@/store/globalSlices'
+import { useDispatch, useSelector } from 'react-redux'
+import { getLottery, getLuckyNumbers, getPurchasedNumbers } from '@/services/blockchain'
 
 function Jackpot({ lottery, lotteryNumbers, numbersPurchased }) {
+  const dispatch = useDispatch()
+  const { setLuckyNumbers, setPurchasedNumbers, setJackpot } = globalActions
+  const {luckyNumbers, purchasedNumbers, jackpot} = useSelector((states) => states.globalStates)
+
+  useEffect(() => {
+    dispatch(setJackpot(lottery))
+    dispatch(setLuckyNumbers(lotteryNumbers))
+    dispatch(setPurchasedNumbers(numbersPurchased))
+  },[])
+
   return (
     <div>
       <Head>
@@ -15,9 +28,9 @@ function Jackpot({ lottery, lotteryNumbers, numbersPurchased }) {
       <div className="min-h-screen bg-slate-100">
         <SubHeader />
         <JackpotTable
-          jackpot={lottery}
-          luckyNumbers={lotteryNumbers}
-          participants={numbersPurchased}
+          jackpot={jackpot}
+          luckyNumbers={luckyNumbers}
+          participants={purchasedNumbers}
         />
         <Generator />
       </div>

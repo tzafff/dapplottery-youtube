@@ -128,6 +128,9 @@ const exportLuckyNumbers = async (id, luckyNumbers) => {
       from: wallet,
     })
     tx.wait()
+
+    const lotteryLuckyNumbers = await getLuckyNumbers(id)
+    store.dispatch(setLuckyNumbers(lotteryLuckyNumbers))
   } catch (error) {
     reportError(error)
   }
@@ -144,6 +147,14 @@ const buyTicket = async (id, luckyNumberId, ticketPrice) => {
       value: toWei(ticketPrice)
     })
     tx.wait()
+
+    const purchasedNumbers = await getPurchasedNumbers(id)
+    const lotteryLuckyNumbers = await getLuckyNumbers(id)
+    const lottery = await getLottery(id)
+
+    store.dispatch(setPurchasedNumbers(purchasedNumbers))
+    store.dispatch(setLuckyNumbers(lotteryLuckyNumbers))
+    store.dispatch(setJackpot(lottery))
   } catch (error) {
     reportError(error)
   }
