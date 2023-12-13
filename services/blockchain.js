@@ -182,10 +182,19 @@ const performDraw = async (id, numberOfWinners) => {
       from: wallet,
     })
     tx.wait()
+
+    const lotteryParticipants = await getParticipants(id)
+    const lottery = await getLottery(id)
+    const result = await getLotteryResult(id)
+
+    store.dispatch(setParticipants(lotteryParticipants))
+    store.dispatch(setJackpot(lottery))
+    store.dispatch(setResult(result))
   } catch (error) {
     reportError(error)
   }
 }
+
 
 const structureLotteries = (lotteries) =>
   lotteries.map((lottery) => ({

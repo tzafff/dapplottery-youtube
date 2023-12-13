@@ -6,6 +6,6 @@ export const globalStates = {
   jackpot: null,
   luckyNumbers: [],
   purchasedNumbers: [],
-  // result: null,
-  // participants: [],
+  result: null,
+  participants: [],
 }

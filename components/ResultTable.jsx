@@ -12,6 +12,11 @@ const ResultTable = ({ jackpot, participants, result }) => {
   const dispatch = useDispatch()
   const { wallet } = useSelector((states) => states.globalStates)
 
+  const onDraw = () => {
+    if (jackpot.expiresAt > Date.now()) return toast.warning('Still counting down')
+    dispatch(setWinnersModal('scale-100'))
+  }
+
   return (
     <div className="py-10 px-5 bg-slate-100">
       <div className="flex flex-col items-center justify-center text-center py-10">
@@ -32,7 +37,7 @@ const ResultTable = ({ jackpot, participants, result }) => {
         <div className="flex justify-center items-center space-x-2">
         {wallet.toLowerCase() == jackpot?.owner ? (
             <button
-              onClick={() => dispatch(setWinnersModal('scale-100'))}
+              onClick={onDraw}
               className="flex flex-nowrap border py-2 px-4 rounded-full bg-green-500
             hover:bg-rose-600 font-semibold"
             >

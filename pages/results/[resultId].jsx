@@ -6,8 +6,18 @@ import { globalActions } from '@/store/globalSlices'
 import { useDispatch, useSelector } from 'react-redux'
 import { getLottery, getParticipants, getLotteryResult } from '@/services/blockchain'
 import { useEffect } from 'react'
+
 function Result({lottery, participantList, lotteryResult}) {
-  console.log(lotteryResult)
+  const { setJackpot, setResult, setParticipants } = globalActions
+  const { participants, jackpot, result } = useSelector((states) => states.globalStates)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(setJackpot(lottery))
+    dispatch(setParticipants(participantList))
+    dispatch(setResult(lotteryResult))
+  },[])
+
   return (
     <div>
       <Head>
@@ -17,7 +27,7 @@ function Result({lottery, participantList, lotteryResult}) {
 
       <div className="min-h-screen bg-slate-100">
         <SubHeader />
-        <ResultTable jackpot={lottery} participants={participantList} result={lotteryResult}/>
+        <ResultTable jackpot={jackpot} participants={participants} result={result}/>
         <Winners />
       </div>
     </div>
