@@ -96,6 +96,14 @@ const getPurchasedNumbers = async (id) => {
   return structuredNumbers(participants)
 }
 
+const getParticipants = async (id) => {
+  console.log(id);
+  const contract = await ssrEthereumContract()
+  const participants = await contract.getLotteryParticipants(7)
+  console.log(participants);
+  return structuredParticipants(participants)
+}
+
 const createJackpot = async ({ title, description, imageUrl, prize, ticketPrice, expiresAt }) => {
   try {
     if (!ethereum) return reportError('Please install Metamask')
@@ -240,6 +248,13 @@ const structuredNumbers = (participants) => {
   return purchasedNumbers
 }
 
+const structuredParticipants = (participants) =>
+  participants.map((participant) => ({
+    account: participant[0].toLowerCase(),
+    lotteryNumber: participant[1],
+    paid: participant[2],
+  }))
+
 const reportError = (error) => {
   console.log(error.message)
 }
@@ -254,5 +269,6 @@ export {
   generateLuckyNumbers,
   getLuckyNumbers,
   buyTicket,
-  getPurchasedNumbers
+  getPurchasedNumbers,
+  getParticipants
 }

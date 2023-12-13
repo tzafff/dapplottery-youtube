@@ -1,12 +1,11 @@
 import Head from 'next/head'
+import Winners from '@/components/Winners'
 import SubHeader from '@/components/SubHeader'
 import ResultTable from '@/components/ResultTable'
-import Winners from '@/components/Winners'
-import {
-  generateLottery,
-  generateLotteryParticipants,
-} from '@/services/fakeData'
-
+import { globalActions } from '@/store/globalSlices'
+import { useDispatch, useSelector } from 'react-redux'
+import { getLottery, getParticipants, getLotteryResult } from '@/services/blockchain'
+import { useEffect } from 'react'
 function Result({lottery, participantList, lotteryResult}) {
   console.log({lottery,participantList,lotteryResult});
   return (
@@ -29,8 +28,9 @@ export default Result
 
 export const getServerSideProps = async (context) => {
   const { resultId } = context.query //Grab URL ID eg: http://localhost:3000/results/1 <-
-  const lottery = generateLottery(resultId)
-  const participantList = generateLotteryParticipants(6)
+  const lottery = await getLottery(resultId)
+  const participantList = await getParticipants(resultId.toString())
+
   const lotteryResult = []
 
   return {

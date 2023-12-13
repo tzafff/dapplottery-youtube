@@ -19,7 +19,7 @@ const ResultTable = ({ jackpot, participants, result }) => {
         <p className="text-sm text-gray-500 w-full sm:w-2/3">{jackpot?.description}</p>
         <p className="text-sm font-medium text-black w-full sm:w-2/3">
           Result for{' '}
-          <span className="font-medium text-green-600">{result?.winners?.length} winners</span> out
+          <span className="font-medium text-green-600">{jackpot?.winners} winners</span> out
           of{' '}
           <span className="font-medium text-gray-600"> {jackpot?.participants} participants</span>{' '}
           {result?.winners?.length > 0 ? 'Drawn' : 'Not Drawn'}
