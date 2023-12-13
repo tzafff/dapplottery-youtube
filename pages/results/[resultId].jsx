@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getLottery, getParticipants, getLotteryResult } from '@/services/blockchain'
 import { useEffect } from 'react'
 function Result({lottery, participantList, lotteryResult}) {
-  console.log({lottery,participantList,lotteryResult});
+  console.log(lotteryResult)
   return (
     <div>
       <Head>
@@ -31,7 +31,7 @@ export const getServerSideProps = async (context) => {
   const lottery = await getLottery(resultId)
   const participantList = await getParticipants(resultId.toString())
 
-  const lotteryResult = []
+  const lotteryResult = await getLotteryResult(resultId)
 
   return {
     props: {

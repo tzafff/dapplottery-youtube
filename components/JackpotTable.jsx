@@ -65,7 +65,7 @@ const JackpotTable = ({ jackpot, luckyNumbers, participants }) => {
            null }
 
           <Link
-            href={`/results/` + 1}
+            href={`/results/` + jackpot?.id}
             className="flex flex-nowrap border py-2 px-4 rounded-full bg-[#0c2856]
                 hover:bg-[#1a396c] cursor-pointer font-semibold text-white"
           >

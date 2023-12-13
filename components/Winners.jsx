@@ -1,9 +1,15 @@
 import { useState } from 'react'
 import { FaTimes } from 'react-icons/fa'
-import { globalActions } from '@/store/globalSlices'
 import { useDispatch, useSelector } from 'react-redux'
+import { globalActions } from '@/store/globalSlices'
+import { toast } from 'react-toastify'
+import { performDraw } from '@/services/blockchain'
+import { useRouter } from 'next/router'
+
 
 const Winners = () => {
+  const router = useRouter()
+  const { resultId } = router.query
   const [numberOfWinners, setNumberOfWinners] = useState('')
   const [close, setClose] = useState('scale-100')
   const { winnersModal } = useSelector((states) => states.globalStates)
@@ -12,8 +18,23 @@ const Winners = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log(numberOfWinners)
-    dispatch(setWinnersModal('scale-0'))
+
+    await toast.promise(
+      new Promise(async (resolve, reject) => {
+        await performDraw(resultId, numberOfWinners)
+          .then(async () => {
+            setNumberOfWinners('')
+            dispatch(setWinnersModal('scale-0'))
+            resolve()
+          })
+          .catch(() => reject())
+      }),
+      {
+        pending: 'Approve transaction...',
+        success: 'Draw performed successfully 👌',
+        error: 'Encountered error 🤯',
+      }
+    )
   }
 
   return (

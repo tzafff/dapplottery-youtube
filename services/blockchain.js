@@ -97,11 +97,15 @@ const getPurchasedNumbers = async (id) => {
 }
 
 const getParticipants = async (id) => {
-  console.log(id);
   const contract = await ssrEthereumContract()
-  const participants = await contract.getLotteryParticipants(7)
-  console.log(participants);
+  const participants = await contract.getLotteryParticipants(id)
   return structuredParticipants(participants)
+}
+
+const getLotteryResult = async (id) => {
+  const contract = await ssrEthereumContract()
+  const lotteryResult = await contract.getLotteryResult(id)
+  return structuredResult(lotteryResult)
 }
 
 const createJackpot = async ({ title, description, imageUrl, prize, ticketPrice, expiresAt }) => {
@@ -152,7 +156,7 @@ const buyTicket = async (id, luckyNumberId, ticketPrice) => {
 
     tx = await contract.buyTicket(id, luckyNumberId, {
       from: wallet,
-      value: toWei(ticketPrice)
+      value: toWei(ticketPrice),
     })
     tx.wait()
 
@@ -163,6 +167,21 @@ const buyTicket = async (id, luckyNumberId, ticketPrice) => {
     store.dispatch(setPurchasedNumbers(purchasedNumbers))
     store.dispatch(setLuckyNumbers(lotteryLuckyNumbers))
     store.dispatch(setJackpot(lottery))
+  } catch (error) {
+    reportError(error)
+  }
+}
+
+const performDraw = async (id, numberOfWinners) => {
+  try {
+    if (!ethereum) return reportError('Please install Metamask')
+    const wallet = store.getState().globalStates.wallet
+    const contract = await csrEthereumContract()
+
+    tx = await contract.randomlySelectWinners(id, numberOfWinners, {
+      from: wallet,
+    })
+    tx.wait()
   } catch (error) {
     reportError(error)
   }
@@ -255,6 +274,24 @@ const structuredParticipants = (participants) =>
     paid: participant[2],
   }))
 
+const structuredResult = (result) => {
+  const LotteryResult = {
+    id: Number(result[0]),
+    completed: result[1],
+    paidout: result[2],
+    timestamp: Number(result[3]),
+    sharePerWinner: fromWei(result[4] || 0),
+    winners: [],
+  }
+
+  for (let i = 0; i < result[5]?.length; i++) {
+    const winner = result[5][i][1]
+    LotteryResult.winners.push(winner)
+  }
+
+  return LotteryResult
+}
+
 const reportError = (error) => {
   console.log(error.message)
 }
@@ -270,5 +307,7 @@ export {
   getLuckyNumbers,
   buyTicket,
   getPurchasedNumbers,
-  getParticipants
+  getParticipants,
+  performDraw,
+  getLotteryResult
 }
